@@ -4,7 +4,7 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Сoursework</a>
+        <a class="navbar-brand" href="">Roberto</a>
     </div>
 </div>
 
@@ -14,11 +14,47 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Главная
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/guests">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Гости
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/rooms">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Номера
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/services">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Услуги
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/reservations">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Бронирования
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/payments">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Оплаты
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/reviews">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Отзывы
+            </NavLink>
+        </div>
+
+@*         <div class="nav-item px-3">
             <NavLink class="nav-link" href="counter">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
             </NavLink>
@@ -34,7 +70,7 @@
             <NavLink class="nav-link" href="auth">
                 <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
             </NavLink>
-        </div>
+        </div> *@
 
         <AuthorizeView>
             <Authorized>
@@ -48,7 +84,7 @@
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                         <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Выйти
                         </button>
                     </form>
                 </div>
@@ -56,12 +92,12 @@
             <NotAuthorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Регистрация
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Авторизация
                     </NavLink>
                 </div>
             </NotAuthorized>
