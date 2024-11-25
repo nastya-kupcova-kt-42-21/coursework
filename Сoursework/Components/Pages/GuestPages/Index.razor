@@ -1,0 +1,41 @@
+﻿@page "/guests"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Сoursework.Models
+@using Сoursework.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index Guests</PageTitle>
+
+<h1>Гости</h1>
+
+<p>
+    <a href="guests/create">Добавить нового гостя</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Guests">
+    <PropertyColumn Title="Фамилия" Property="guest => guest.Surname" />
+    <PropertyColumn Title="Имя" Property="guest => guest.Name" />
+    <PropertyColumn Title="Отчество" Property="guest => guest.Middlename" />
+    <PropertyColumn Title="Электронная почта" Property="guest => guest.Email" />
+    <PropertyColumn Title="Телефон" Property="guest => guest.Phone" />
+    <PropertyColumn Title="Дата рождения" Property="guest => guest.DateofBirth" />
+
+    <TemplateColumn Context="guest">
+        <a href="@($"guests/edit?guestid={guest.GuestId}")">Редактировать</a> |
+        <a href="@($"guests/details?guestid={guest.GuestId}")">Подробнее</a> |
+        <a href="@($"guests/delete?guestid={guest.GuestId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

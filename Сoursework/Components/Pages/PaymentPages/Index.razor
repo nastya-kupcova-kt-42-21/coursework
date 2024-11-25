@@ -1,0 +1,39 @@
+﻿@page "/payments"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Сoursework.Models
+@using Сoursework.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index Payments</PageTitle>
+
+<h1>Оплаты</h1>
+
+<p>
+    <a href="payments/create">Добавить новую оплату</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Payments">
+    <PropertyColumn Title="Бронирование" Property="payment => payment.BookingId" />
+    <PropertyColumn Title="Сумма" Property="payment => payment.Amount" />
+    <PropertyColumn Title="Способ оплаты" Property="payment => payment.PaymentMethod" />
+    <PropertyColumn Title="Дата оплаты" Property="payment => payment.PaymentDate" />
+
+    <TemplateColumn Context="payment">
+        <a href="@($"payments/edit?paymentid={payment.PaymentId}")">Редактировать</a> |
+        <a href="@($"payments/details?paymentid={payment.PaymentId}")">Подробнее</a> |
+        <a href="@($"payments/delete?paymentid={payment.PaymentId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

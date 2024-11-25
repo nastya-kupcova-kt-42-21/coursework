@@ -1,0 +1,109 @@
+﻿@page "/rooms/edit"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Room</PageTitle>
+
+<h1>Редактирование</h1>
+
+<h2>Номер</h2>
+<hr />
+@if (Room is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Room" OnValidSubmit="UpdateRoom" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Room.RoomId" value="@Room.RoomId" />
+                <div class="mb-3">
+                    <label for="rommnumber" class="form-label">№:</label>
+                    <InputNumber id="rommnumber" @bind-Value="Room.RommNumber" class="form-control" />
+                    <ValidationMessage For="() => Room.RommNumber" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="roomtype" class="form-label">Тип:</label>
+                    <InputText id="roomtype" @bind-Value="Room.RoomType" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Room.RoomType" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="maxguests" class="form-label">Макс. количество гостей:</label>
+                    <InputNumber id="maxguests" @bind-Value="Room.MaxGuests" class="form-control" />
+                    <ValidationMessage For="() => Room.MaxGuests" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="pricefornight" class="form-label">Цена за ночь:</label>
+                    <InputNumber id="pricefornight" @bind-Value="Room.PriceForNight" class="form-control" />
+                    <ValidationMessage For="() => Room.PriceForNight" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="availability" class="form-label">Доступность:</label>
+                    <InputText id="availability" @bind-Value="Room.Availability" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Room.Availability" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/rooms">Назад к списку</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int RoomId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Room? Room { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Room ??= await context.Rooms.FirstOrDefaultAsync(m => m.RoomId == RoomId);
+
+        if (Room is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateRoom()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Room!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!RoomExists(Room!.RoomId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/rooms");
+    }
+
+    private bool RoomExists(int roomid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Rooms.Any(e => e.RoomId == roomid);
+    }
+}

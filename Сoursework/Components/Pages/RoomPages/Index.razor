@@ -1,0 +1,40 @@
+﻿@page "/rooms"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Сoursework.Models
+@using Сoursework.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index Rooms</PageTitle>
+
+<h1>Номера</h1>
+
+<p>
+    <a href="rooms/create">Добавить новый номер</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Rooms">
+    <PropertyColumn Title="№" Property="room => room.RommNumber" />
+    <PropertyColumn Title="Тип" Property="room => room.RoomType" />
+    <PropertyColumn Title="Макс. количество гостей" Property="room => room.MaxGuests" />
+    <PropertyColumn Title="Цена за ночь" Property="room => room.PriceForNight" />
+    <PropertyColumn Title="Доступность" Property="room => room.Availability" />
+
+    <TemplateColumn Context="room">
+        <a href="@($"rooms/edit?roomid={room.RoomId}")">Редактировать</a> |
+        <a href="@($"rooms/details?roomid={room.RoomId}")">Подробнее</a> |
+        <a href="@($"rooms/delete?roomid={room.RoomId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

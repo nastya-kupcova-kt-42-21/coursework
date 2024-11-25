@@ -1,0 +1,41 @@
+﻿@page "/reservations"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Сoursework.Models
+@using Сoursework.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index Reservations</PageTitle>
+
+<h1>Бронирования</h1>
+
+<p>
+    <a href="reservations/create">Добавить новое бронирование</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Reservations">
+    <PropertyColumn Title="Гость" Property="reservation => reservation.GuestId" />
+    <PropertyColumn Title="Номер" Property="reservation => reservation.RoomId" />
+    <PropertyColumn Title="Услуга" Property="reservation => reservation.ServiceId" />
+    <PropertyColumn Title="Дата заезда" Property="reservation => reservation.StartDate" />
+    <PropertyColumn Title="Дата выезда" Property="reservation => reservation.EndDate" />
+    <PropertyColumn Title="Статус" Property="reservation => reservation.BookingStatus" />
+
+    <TemplateColumn Context="reservation">
+        <a href="@($"reservations/edit?bookingid={reservation.BookingId}")">Редактировать</a> |
+        <a href="@($"reservations/details?bookingid={reservation.BookingId}")">Подробнее</a> |
+        <a href="@($"reservations/delete?bookingid={reservation.BookingId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

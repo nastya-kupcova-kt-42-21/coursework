@@ -1,0 +1,104 @@
+﻿@page "/payments/edit"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Payment</PageTitle>
+
+<h1>Редактирование</h1>
+
+<h2>Оплата</h2>
+<hr />
+@if (Payment is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Payment" OnValidSubmit="UpdatePayment" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Payment.PaymentId" value="@Payment.PaymentId" />
+                <div class="mb-3">
+                    <label for="bookingid" class="form-label">Бронирование:</label>
+                    <InputNumber id="bookingid" @bind-Value="Payment.BookingId" class="form-control" />
+                    <ValidationMessage For="() => Payment.BookingId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Сумма:</label>
+                    <InputNumber id="amount" @bind-Value="Payment.Amount" class="form-control" />
+                    <ValidationMessage For="() => Payment.Amount" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="paymentmethod" class="form-label">Способ оплаты:</label>
+                    <InputText id="paymentmethod" @bind-Value="Payment.PaymentMethod" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Payment.PaymentMethod" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="paymentdate" class="form-label">Дата оплаты:</label>
+                    <InputDate id="paymentdate" @bind-Value="Payment.PaymentDate" class="form-control" />
+                    <ValidationMessage For="() => Payment.PaymentDate" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/payments">Назад к списку</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int PaymentId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Payment? Payment { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Payment ??= await context.Payments.FirstOrDefaultAsync(m => m.PaymentId == PaymentId);
+
+        if (Payment is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdatePayment()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Payment!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!PaymentExists(Payment!.PaymentId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/payments");
+    }
+
+    private bool PaymentExists(int paymentid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Payments.Any(e => e.PaymentId == paymentid);
+    }
+}

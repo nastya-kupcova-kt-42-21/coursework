@@ -1,0 +1,64 @@
+﻿@page "/rooms/create"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create Room</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Room</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Room" OnValidSubmit="AddRoom" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="rommnumber" class="form-label">№:</label>
+                <InputNumber id="rommnumber" @bind-Value="Room.RommNumber" class="form-control" /> 
+                <ValidationMessage For="() => Room.RommNumber" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="roomtype" class="form-label">Тип:</label>
+                <InputText id="roomtype" @bind-Value="Room.RoomType" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Room.RoomType" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="maxguests" class="form-label">Макс. количество гостей:</label>
+                <InputNumber id="maxguests" @bind-Value="Room.MaxGuests" class="form-control" /> 
+                <ValidationMessage For="() => Room.MaxGuests" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="pricefornight" class="form-label">Цена за ночь:</label> 
+                <InputNumber id="pricefornight" @bind-Value="Room.PriceForNight" class="form-control" /> 
+                <ValidationMessage For="() => Room.PriceForNight" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="availability" class="form-label">Доступность:</label> 
+                <InputText id="availability" @bind-Value="Room.Availability" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Room.Availability" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/rooms">Назад к списку</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Room Room { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddRoom()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Rooms.Add(Room);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/rooms");
+    }
+}

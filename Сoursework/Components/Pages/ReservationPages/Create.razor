@@ -1,0 +1,69 @@
+﻿@page "/reservations/create"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create Reservation</PageTitle>
+
+<h1>Добавление</h1>
+
+<h2>Бронирование</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Reservation" OnValidSubmit="AddReservation" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="guestid" class="form-label">Гость:</label>
+                <InputNumber id="guestid" @bind-Value="Reservation.GuestId" class="form-control" /> 
+                <ValidationMessage For="() => Reservation.GuestId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="roomid" class="form-label">Номер:</label>
+                <InputNumber id="roomid" @bind-Value="Reservation.RoomId" class="form-control" /> 
+                <ValidationMessage For="() => Reservation.RoomId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="serviceid" class="form-label">Услуга:</label>
+                <InputNumber id="serviceid" @bind-Value="Reservation.ServiceId" class="form-control" /> 
+                <ValidationMessage For="() => Reservation.ServiceId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="startdate" class="form-label">Дата заезда:</label>
+                <InputDate id="startdate" @bind-Value="Reservation.StartDate" class="form-control" /> 
+                <ValidationMessage For="() => Reservation.StartDate" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="enddate" class="form-label">Дата выезда:</label>
+                <InputDate id="enddate" @bind-Value="Reservation.EndDate" class="form-control" /> 
+                <ValidationMessage For="() => Reservation.EndDate" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="bookingstatus" class="form-label">Статус:</label>
+                <InputText id="bookingstatus" @bind-Value="Reservation.BookingStatus" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Reservation.BookingStatus" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/reservations">Назад к списку</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Reservation Reservation { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddReservation()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Reservations.Add(Reservation);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/reservations");
+    }
+}

@@ -1,0 +1,40 @@
+﻿@page "/reviews"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Сoursework.Models
+@using Сoursework.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Index Reviews</PageTitle>
+
+<h1>Отзывы</h1>
+
+<p>
+    <a href="reviews/create">Добавить новый отзыв</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Reviews">
+    <PropertyColumn Title="Гость" Property="review => review.GuestId" />
+    <PropertyColumn Title="Номер" Property="review => review.RoomId" />
+    <PropertyColumn Title="Оценка" Property="review => review.Rating" />
+    <PropertyColumn Title="Комментарий" Property="review => review.Comment" />
+    <PropertyColumn Title="Дата отзыва" Property="review => review.ReviewDate" />
+
+    <TemplateColumn Context="review">
+        <a href="@($"reviews/edit?reviewid={review.ReviewId}")">Редактировать</a> |
+        <a href="@($"reviews/details?reviewid={review.ReviewId}")">Подробнее</a> |
+        <a href="@($"reviews/delete?reviewid={review.ReviewId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

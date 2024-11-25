@@ -1,0 +1,54 @@
+﻿@page "/rooms/details"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details Room</PageTitle>
+
+<h1>Подробнее</h1>
+
+<div>
+    <h2>Номер</h2>
+    <hr />
+    @if (room is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">№</dt>
+            <dd class="col-sm-10">@room.RommNumber</dd>
+            <dt class="col-sm-2">Тип</dt>
+            <dd class="col-sm-10">@room.RoomType</dd>
+            <dt class="col-sm-2">Макс. количество гостей</dt>
+            <dd class="col-sm-10">@room.MaxGuests</dd>
+            <dt class="col-sm-2">Цена за ночь</dt>
+            <dd class="col-sm-10">@room.PriceForNight</dd>
+            <dt class="col-sm-2">Доступность</dt>
+            <dd class="col-sm-10">@room.Availability</dd>
+        </dl>
+        <div>
+            <a href="@($"/rooms/edit?roomid={room.RoomId}")">Редактировать</a> |
+            <a href="@($"/rooms")">Назад к списку</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Room? room;
+
+    [SupplyParameterFromQuery]
+    private int RoomId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        room = await context.Rooms.FirstOrDefaultAsync(m => m.RoomId == RoomId);
+
+        if (room is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

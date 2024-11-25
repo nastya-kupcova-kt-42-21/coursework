@@ -1,0 +1,56 @@
+﻿@page "/guests/details"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details Guest</PageTitle>
+
+<h1>Подробнее</h1>
+
+<div>
+    <h2>Гость</h2>
+    <hr />
+    @if (guest is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Фамилия</dt>
+            <dd class="col-sm-10">@guest.Surname</dd>
+            <dt class="col-sm-2">Имя</dt>
+            <dd class="col-sm-10">@guest.Name</dd>
+            <dt class="col-sm-2">Отчество</dt>
+            <dd class="col-sm-10">@guest.Middlename</dd>
+            <dt class="col-sm-2">Электронная почта</dt>
+            <dd class="col-sm-10">@guest.Email</dd>
+            <dt class="col-sm-2">Телефон</dt>
+            <dd class="col-sm-10">@guest.Phone</dd>
+            <dt class="col-sm-2">Дата рождения</dt>
+            <dd class="col-sm-10">@guest.DateofBirth</dd>
+        </dl>
+        <div>
+            <a href="@($"/guests/edit?guestid={guest.GuestId}")">Редактировать</a> |
+            <a href="@($"/guests")">Назад к списку</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Guest? guest;
+
+    [SupplyParameterFromQuery]
+    private int GuestId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        guest = await context.Guests.FirstOrDefaultAsync(m => m.GuestId == GuestId);
+
+        if (guest is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

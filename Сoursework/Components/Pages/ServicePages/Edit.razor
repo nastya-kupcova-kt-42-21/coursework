@@ -1,0 +1,99 @@
+﻿@page "/services/edit"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Service</PageTitle>
+
+<h1>Редактирование</h1>
+
+<h2>Услуга</h2>
+<hr />
+@if (Service is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Service" OnValidSubmit="UpdateService" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Service.ServiceId" value="@Service.ServiceId" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Название:</label>
+                    <InputText id="name" @bind-Value="Service.Name" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Service.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="price" class="form-label">Стоимость:</label>
+                    <InputNumber id="price" @bind-Value="Service.Price" class="form-control" />
+                    <ValidationMessage For="() => Service.Price" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Описание:</label>
+                    <InputText id="description" @bind-Value="Service.Description" class="form-control" aria-required="true"/>
+                    <ValidationMessage For="() => Service.Description" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/services">Назад к списку</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int ServiceId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Service? Service { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Service ??= await context.Services.FirstOrDefaultAsync(m => m.ServiceId == ServiceId);
+
+        if (Service is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateService()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Service!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ServiceExists(Service!.ServiceId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/services");
+    }
+
+    private bool ServiceExists(int serviceid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Services.Any(e => e.ServiceId == serviceid);
+    }
+}

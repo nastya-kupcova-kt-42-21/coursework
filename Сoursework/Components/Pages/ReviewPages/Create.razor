@@ -1,0 +1,64 @@
+﻿@page "/reviews/create"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create Review</PageTitle>
+
+<h1>Добавление</h1>
+
+<h2>Отзыв</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Review" OnValidSubmit="AddReview" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="guestid" class="form-label">Гость:</label>
+                <InputNumber id="guestid" @bind-Value="Review.GuestId" class="form-control" /> 
+                <ValidationMessage For="() => Review.GuestId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="roomid" class="form-label">Номер:</label>
+                <InputNumber id="roomid" @bind-Value="Review.RoomId" class="form-control" /> 
+                <ValidationMessage For="() => Review.RoomId" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="rating" class="form-label">Оценка:</label>
+                <InputNumber id="rating" @bind-Value="Review.Rating" class="form-control" /> 
+                <ValidationMessage For="() => Review.Rating" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="comment" class="form-label">Комментарий:</label>
+                <InputText id="comment" @bind-Value="Review.Comment" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Review.Comment" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="reviewdate" class="form-label">Дата отзыва:</label>
+                <InputDate id="reviewdate" @bind-Value="Review.ReviewDate" class="form-control" /> 
+                <ValidationMessage For="() => Review.ReviewDate" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/reviews">Назад к списку</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Review Review { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddReview()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Reviews.Add(Review);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/reviews");
+    }
+}

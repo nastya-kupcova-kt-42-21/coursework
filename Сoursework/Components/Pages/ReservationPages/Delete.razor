@@ -1,0 +1,75 @@
+﻿@page "/reservations/delete"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete Reservation</PageTitle>
+
+<h1>Удаление</h1>
+
+<p>Вы действительно хотите удалить?</p>
+<div>
+    <h2>Бронирование</h2>
+    <hr />
+    @if (reservation is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Гость</dt>
+            <dd class="col-sm-10">@reservation.GuestId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Номер</dt>
+            <dd class="col-sm-10">@reservation.RoomId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Услуга</dt>
+            <dd class="col-sm-10">@reservation.ServiceId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Дата заезда</dt>
+            <dd class="col-sm-10">@reservation.StartDate</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Дата выезда</dt>
+            <dd class="col-sm-10">@reservation.EndDate</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Статус</dt>
+            <dd class="col-sm-10">@reservation.BookingStatus</dd>
+        </dl>
+        <EditForm method="post" Model="reservation" OnValidSubmit="DeleteReservation" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(reservation is null)">Удалить</button> |
+            <a href="/reservations">Назад к списку</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Reservation? reservation;
+
+    [SupplyParameterFromQuery]
+    private int BookingId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        reservation = await context.Reservations.FirstOrDefaultAsync(m => m.BookingId == BookingId);
+
+        if (reservation is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteReservation()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Reservations.Remove(reservation!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/reservations");
+    }
+}

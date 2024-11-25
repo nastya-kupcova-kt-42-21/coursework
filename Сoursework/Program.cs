@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Сoursework.Components;
 using Сoursework.Components.Account;
 using Сoursework.Data;
+using Microsoft.AspNetCore.Components.QuickGrid;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,7 +61,7 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")),
     ServiceLifetime.Scoped);
 
-//builder.Services.AddQuickGridEntityFrameworkAdapter();  ВЕРНУТЬ ПОТОМ
+builder.Services.AddQuickGridEntityFrameworkAdapter(); 
 
 // Add services to the container
 builder.Services.AddSignalR();
@@ -71,6 +73,8 @@ builder.Logging.SetMinimumLevel(LogLevel.Trace);
 builder.Logging.AddConsole();
 
 var app = builder.Build();
+
+//await builder.Build().RunAsync();
 
 //+++ register seeding ВЕРНУТЬ ПОТОМ
 //await using var scope = app.Services.GetRequiredService<IServiceScopeFactory>().CreateAsyncScope();

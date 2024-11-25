@@ -1,0 +1,69 @@
+﻿@page "/guests/create"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create Guest</PageTitle>
+
+<h1>Добавление</h1>
+
+<h2>Гость</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Guest" OnValidSubmit="AddGuest" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="surname" class="form-label">Фамилия:</label> 
+                <InputText id="surname" @bind-Value="Guest.Surname" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Guest.Surname" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="name" class="form-label">Имя:</label> 
+                <InputText id="name" @bind-Value="Guest.Name" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Guest.Name" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="middlename" class="form-label">Отчество:</label> 
+                <InputText id="middlename" @bind-Value="Guest.Middlename" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Guest.Middlename" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="email" class="form-label">Электронная почта:</label>
+                <InputText id="email" @bind-Value="Guest.Email" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Guest.Email" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="phone" class="form-label">Телефон:</label> 
+                <InputText id="phone" @bind-Value="Guest.Phone" class="form-control" aria-required="true"/> 
+                <ValidationMessage For="() => Guest.Phone" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="dateofbirth" class="form-label">Дата рождения:</label> 
+                <InputDate id="dateofbirth" @bind-Value="Guest.DateofBirth" class="form-control" /> 
+                <ValidationMessage For="() => Guest.DateofBirth" class="text-danger" /> 
+            </div>        
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/guests">Назад к списку</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Guest Guest { get; set; } = new();
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddGuest()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Guests.Add(Guest);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/guests");
+    }
+}

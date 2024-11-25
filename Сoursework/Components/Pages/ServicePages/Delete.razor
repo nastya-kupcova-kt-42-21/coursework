@@ -1,0 +1,63 @@
+﻿@page "/services/delete"
+@using Microsoft.EntityFrameworkCore
+@using Сoursework.Models
+@inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete Service</PageTitle>
+
+<h1>Удаление</h1>
+
+<p>Вы действительно хотите удалить?</p>
+<div>
+    <h2>Услуга</h2>
+    <hr />
+    @if (service is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Название</dt>
+            <dd class="col-sm-10">@service.Name</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Стоимость</dt>
+            <dd class="col-sm-10">@service.Price</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Описание</dt>
+            <dd class="col-sm-10">@service.Description</dd>
+        </dl>
+        <EditForm method="post" Model="service" OnValidSubmit="DeleteService" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(service is null)">Удалить</button> |
+            <a href="/services">Назад к списку</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Service? service;
+
+    [SupplyParameterFromQuery]
+    private int ServiceId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        service = await context.Services.FirstOrDefaultAsync(m => m.ServiceId == ServiceId);
+
+        if (service is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteService()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Services.Remove(service!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/services");
+    }
+}
