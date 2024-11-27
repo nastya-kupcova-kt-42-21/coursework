@@ -1,10 +1,12 @@
 ﻿@page "/payments"
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
+@using System.Web
 @using Сoursework.Models
 @using Сoursework.Data
 @implements IAsyncDisposable
 @inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
 
 <PageTitle>Index Payments</PageTitle>
 
@@ -14,11 +16,11 @@
     <a href="payments/create">Добавить новую оплату</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Payments">
+<QuickGrid Class="table" Items="Payments">
     <PropertyColumn Title="Бронирование" Property="payment => payment.BookingId" />
     <PropertyColumn Title="Сумма" Property="payment => payment.Amount" />
     <PropertyColumn Title="Способ оплаты" Property="payment => payment.PaymentMethod" />
-    <PropertyColumn Title="Дата оплаты" Property="payment => payment.PaymentDate" />
+    <PropertyColumn Title="Дата оплаты" Property="payment => payment.PaymentDate" Format="dd-MM-yyyy" />
 
     <TemplateColumn Context="payment">
         <a href="@($"payments/edit?paymentid={payment.PaymentId}")">Редактировать</a> |
@@ -28,12 +30,24 @@
 </QuickGrid>
 
 @code {
+    [Parameter]
+    public int? BookingId { get; set; }
     private ApplicationDbContext context = default!;
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+        var uri = new Uri(NavigationManager.Uri);
+        var query = HttpUtility.ParseQueryString(uri.Query);
+
+        if (int.TryParse(query["bookingId"], out int bookingId))
+        {
+            BookingId = bookingId; // Устанавливаем BookingId для фильтрации
+        }
     }
+
+    private IQueryable<Payment> Payments => context.Payments
+        .Where(c => !BookingId.HasValue || c.BookingId == BookingId); // Теперь фильтр работает корректно
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();
 }

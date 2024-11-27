@@ -20,9 +20,10 @@
     <PropertyColumn Title="Отчество" Property="guest => guest.Middlename" />
     <PropertyColumn Title="Электронная почта" Property="guest => guest.Email" />
     <PropertyColumn Title="Телефон" Property="guest => guest.Phone" />
-    <PropertyColumn Title="Дата рождения" Property="guest => guest.DateofBirth" />
+    <PropertyColumn Title="Дата рождения" Property="guest => guest.DateofBirth" Format="dd-MM-yyyy" />
 
     <TemplateColumn Context="guest">
+        <a href="@($"reservations?guestid={guest.GuestId}")">Бронирования</a> |
         <a href="@($"guests/edit?guestid={guest.GuestId}")">Редактировать</a> |
         <a href="@($"guests/details?guestid={guest.GuestId}")">Подробнее</a> |
         <a href="@($"guests/delete?guestid={guest.GuestId}")">Удалить</a>

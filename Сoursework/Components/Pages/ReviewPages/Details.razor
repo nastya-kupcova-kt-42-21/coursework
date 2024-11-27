@@ -18,15 +18,15 @@
     else {
         <dl class="row">
             <dt class="col-sm-2">Гость</dt>
-            <dd class="col-sm-10">@review.GuestId</dd>
+            <dd class="col-sm-10">@review.GuestName</dd>
             <dt class="col-sm-2">Номер</dt>
-            <dd class="col-sm-10">@review.RoomId</dd>
+            <dd class="col-sm-10">@review.RommNumber</dd>
             <dt class="col-sm-2">Оценка</dt>
             <dd class="col-sm-10">@review.Rating</dd>
             <dt class="col-sm-2">Комментарий</dt>
             <dd class="col-sm-10">@review.Comment</dd>
             <dt class="col-sm-2">Дата отзыва</dt>
-            <dd class="col-sm-10">@review.ReviewDate</dd>
+            <dd class="col-sm-10">@review.ReviewDate?.ToString("dd-MM-yyyy")</dd>
         </dl>
         <div>
             <a href="@($"/reviews/edit?reviewid={review.ReviewId}")">Редактировать</a> |
@@ -36,7 +36,7 @@
 </div>
 
 @code {
-    private Review? review;
+    private ReviewsDto? review;
 
     [SupplyParameterFromQuery]
     private int ReviewId { get; set; }
@@ -44,11 +44,34 @@
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        review = await context.Reviews.FirstOrDefaultAsync(m => m.ReviewId == ReviewId);
+        review = await context.Reviews
+            .Include(d => d.Guests) // Загружаем связанные данные
+            .Include(d => d.Rooms)
+            .Select(d => new ReviewsDto
+                {
+                    ReviewId = d.ReviewId,
+                    GuestName = $"{d.Guests.Surname} {d.Guests.Name} {d.Guests.Middlename}",
+                    RommNumber = d.Rooms.RommNumber,
+                    Rating = d.Rating,
+                    Comment = d.Comment,
+                    ReviewDate = d.ReviewDate
+                })
+    .FirstOrDefaultAsync(m => m.ReviewId == ReviewId);
+
 
         if (review is null)
         {
             NavigationManager.NavigateTo("notfound");
         }
+    }
+
+    public class ReviewsDto
+    {
+        public int ReviewId { get; set; }
+        public string? GuestName { get; set; }
+        public int RommNumber { get; set; }
+        public int Rating { get; set; }
+        public string? Comment { get; set; }
+        public DateTime? ReviewDate { get; set; }
     }
 }

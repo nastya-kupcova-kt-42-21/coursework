@@ -17,17 +17,32 @@
             <ValidationSummary class="text-danger" role="alert"/>
             <div class="mb-3">
                 <label for="guestid" class="form-label">Гость:</label>
-                <InputNumber id="guestid" @bind-Value="Reservation.GuestId" class="form-control" /> 
+                <InputSelect id="guestid" @bind-Value="Reservation.GuestId" class="form-control">
+                    @foreach (var guest in Guests)
+                    {
+                        <option value="@guest.GuestId">@($"{guest.Surname} {guest.Name} {guest.Middlename}")</option>
+                    }
+                </InputSelect>
                 <ValidationMessage For="() => Reservation.GuestId" class="text-danger" /> 
             </div>        
             <div class="mb-3">
                 <label for="roomid" class="form-label">Номер:</label>
-                <InputNumber id="roomid" @bind-Value="Reservation.RoomId" class="form-control" /> 
+                <InputSelect id="roomid" @bind-Value="Reservation.RoomId" class="form-control">
+                    @foreach (var room in Rooms)
+                    {
+                        <option value="@room.RoomId">@room.RommNumber</option>
+                    }
+                </InputSelect>
                 <ValidationMessage For="() => Reservation.RoomId" class="text-danger" /> 
             </div>        
             <div class="mb-3">
                 <label for="serviceid" class="form-label">Услуга:</label>
-                <InputNumber id="serviceid" @bind-Value="Reservation.ServiceId" class="form-control" /> 
+                <InputSelect id="serviceid" @bind-Value="Reservation.ServiceId" class="form-control">
+                    @foreach (var service in Services)
+                    {
+                        <option value="@service.ServiceId">@service.Name</option>
+                    }
+                </InputSelect>
                 <ValidationMessage For="() => Reservation.ServiceId" class="text-danger" /> 
             </div>        
             <div class="mb-3">
@@ -57,6 +72,17 @@
 @code {
     [SupplyParameterFromForm]
     private Reservation Reservation { get; set; } = new();
+    private List<Guest> Guests { get; set; } = new();
+    private List<Room> Rooms { get; set; } = new();
+    private List<Service> Services { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Guests = await context.Guests.ToListAsync();
+        Rooms = await context.Rooms.ToListAsync();
+        Services = await context.Services.ToListAsync();
+    }
 
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddReservation()

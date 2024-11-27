@@ -24,17 +24,32 @@ else
                 <input type="hidden" name="Reservation.BookingId" value="@Reservation.BookingId" />
                 <div class="mb-3">
                     <label for="guestid" class="form-label">Гость:</label>
-                    <InputNumber id="guestid" @bind-Value="Reservation.GuestId" class="form-control" />
+                    <InputSelect id="guestid" @bind-Value="Reservation.GuestId" class="form-control" >
+                    @foreach (var guest in Guests)
+                    {
+                    <option value="@guest.GuestId">@($"{guest.Surname} {guest.Name} {guest.Middlename}")</option>
+                    }
+                    </InputSelect>
                     <ValidationMessage For="() => Reservation.GuestId" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="roomid" class="form-label">Номер:</label>
-                    <InputNumber id="roomid" @bind-Value="Reservation.RoomId" class="form-control" />
+                    <InputSelect id="roomid" @bind-Value="Reservation.RoomId" class="form-control">
+                        @foreach (var room in Rooms)
+                    {
+                            <option value="@room.RoomId">@room.RommNumber</option>
+                    }
+                    </InputSelect>
                     <ValidationMessage For="() => Reservation.RoomId" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="serviceid" class="form-label">Услуга:</label>
-                    <InputNumber id="serviceid" @bind-Value="Reservation.ServiceId" class="form-control" />
+                    <InputSelect id="serviceid" @bind-Value="Reservation.ServiceId" class="form-control" >
+                        @foreach (var service in Services)
+                        {
+                            <option value="@service.ServiceId">@service.Name</option>
+                        }
+                    </InputSelect>
                     <ValidationMessage For="() => Reservation.ServiceId" class="text-danger" />
                 </div>
                 <div class="mb-3">
@@ -68,16 +83,30 @@ else
 
     [SupplyParameterFromForm]
     private Reservation? Reservation { get; set; }
+    private List<Guest> Guests { get; set; } = new();
+    private List<Room> Rooms { get; set; } = new();
+    private List<Service> Services { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        Reservation ??= await context.Reservations.FirstOrDefaultAsync(m => m.BookingId == BookingId);
+
+        Reservation = await context.Reservations
+    .Include(d => d.Guests)
+    .Include(d => d.Rooms)
+    .Include(d => d.Services)
+    .FirstOrDefaultAsync(m => m.BookingId == BookingId);
 
         if (Reservation is null)
         {
             NavigationManager.NavigateTo("notfound");
         }
+
+
+        // Загрузим списки для выбора
+        Guests = await context.Guests.ToListAsync();
+        Rooms = await context.Rooms.ToListAsync();
+        Services = await context.Services.ToListAsync();
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.

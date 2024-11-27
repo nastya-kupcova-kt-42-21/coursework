@@ -24,12 +24,22 @@ else
                 <input type="hidden" name="Review.ReviewId" value="@Review.ReviewId" />
                 <div class="mb-3">
                     <label for="guestid" class="form-label">Гость:</label>
-                    <InputNumber id="guestid" @bind-Value="Review.GuestId" class="form-control" />
+                    <InputSelect id="guestid" @bind-Value="Review.GuestId" class="form-control">
+                                        @foreach (var guest in Guests)
+                    {
+                    <option value="@guest.GuestId">@($"{guest.Surname} {guest.Name} {guest.Middlename}")</option>
+                    }
+                    </InputSelect>
                     <ValidationMessage For="() => Review.GuestId" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="roomid" class="form-label">Номер:</label>
-                    <InputNumber id="roomid" @bind-Value="Review.RoomId" class="form-control" />
+                    <InputSelect id="roomid" @bind-Value="Review.RoomId" class="form-control" >
+                        @foreach (var room in Rooms)
+                        {
+                            <option value="@room.RoomId">@room.RommNumber</option>
+                        }
+                    </InputSelect>
                     <ValidationMessage For="() => Review.RoomId" class="text-danger" />
                 </div>
                 <div class="mb-3">
@@ -63,16 +73,26 @@ else
 
     [SupplyParameterFromForm]
     private Review? Review { get; set; }
+    private List<Guest> Guests { get; set; } = new();
+    private List<Room> Rooms { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        Review ??= await context.Reviews.FirstOrDefaultAsync(m => m.ReviewId == ReviewId);
+        //Review ??= await context.Reviews.FirstOrDefaultAsync(m => m.ReviewId == ReviewId);
+        Review = await context.Reviews
+        .Include(d => d.Guests)
+        .Include(d => d.Rooms)
+        .FirstOrDefaultAsync(m => m.ReviewId == ReviewId);
 
         if (Review is null)
         {
             NavigationManager.NavigateTo("notfound");
         }
+
+        // Загрузим списки для выбора
+        Guests = await context.Guests.ToListAsync();
+        Rooms = await context.Rooms.ToListAsync();
     }
 
     // To protect from overposting attacks, enable the specific properties you want to bind to.

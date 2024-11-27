@@ -14,12 +14,12 @@
     <a href="reviews/create">Добавить новый отзыв</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Reviews">
-    <PropertyColumn Title="Гость" Property="review => review.GuestId" />
-    <PropertyColumn Title="Номер" Property="review => review.RoomId" />
+<QuickGrid Class="table" Items="Reviews">
+    <PropertyColumn Title="Гость" Property="review => review.GuestName" />
+    <PropertyColumn Title="Номер" Property="review => review.RommNumber" />
     <PropertyColumn Title="Оценка" Property="review => review.Rating" />
     <PropertyColumn Title="Комментарий" Property="review => review.Comment" />
-    <PropertyColumn Title="Дата отзыва" Property="review => review.ReviewDate" />
+    <PropertyColumn Title="Дата отзыва" Property="review => review.ReviewDate" Format="dd-MM-yyyy" />
 
     <TemplateColumn Context="review">
         <a href="@($"reviews/edit?reviewid={review.ReviewId}")">Редактировать</a> |
@@ -30,11 +30,37 @@
 
 @code {
     private ApplicationDbContext context = default!;
+    private IQueryable<ReviewsDto> Reviews;
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+        Reviews = GetReviews();
     }
 
+    private IQueryable<ReviewsDto> GetReviews() =>
+    context.Reviews
+                    .Include(d => d.Guests) // Загружаем связанные данные
+                    .Include(d => d.Rooms)
+            .Select(d => new ReviewsDto
+                {
+                    ReviewId = d.ReviewId,
+                    GuestName = $"{d.Guests.Surname} {d.Guests.Name} {d.Guests.Middlename}",
+                    RommNumber = d.Rooms.RommNumber,
+                    Rating = d.Rating,
+                    Comment = d.Comment,
+                    ReviewDate = d.ReviewDate
+                });
+
     public async ValueTask DisposeAsync() => await context.DisposeAsync();
+
+    public class ReviewsDto
+    {
+        public int ReviewId { get; set; }
+        public string? GuestName { get; set; }
+        public int RommNumber { get; set; }
+        public int Rating { get; set; }
+        public string? Comment { get; set; }
+        public DateTime? ReviewDate { get; set; }
+    }
 }

@@ -19,23 +19,23 @@
     else {
         <dl class="row">
             <dt class="col-sm-2">Гость</dt>
-            <dd class="col-sm-10">@reservation.GuestId</dd>
+            <dd class="col-sm-10">@reservation.GuestName</dd>
         </dl>
         <dl class="row">
             <dt class="col-sm-2">Номер</dt>
-            <dd class="col-sm-10">@reservation.RoomId</dd>
+            <dd class="col-sm-10">@reservation.RommNumber</dd>
         </dl>
         <dl class="row">
             <dt class="col-sm-2">Услуга</dt>
-            <dd class="col-sm-10">@reservation.ServiceId</dd>
+            <dd class="col-sm-10">@reservation.Servicename</dd>
         </dl>
         <dl class="row">
             <dt class="col-sm-2">Дата заезда</dt>
-            <dd class="col-sm-10">@reservation.StartDate</dd>
+            <dd class="col-sm-10">@reservation.StartDate?.ToString("dd-MM-yyyy")</dd>
         </dl>
         <dl class="row">
             <dt class="col-sm-2">Дата выезда</dt>
-            <dd class="col-sm-10">@reservation.EndDate</dd>
+            <dd class="col-sm-10">@reservation.EndDate?.ToString("dd-MM-yyyy")</dd>
         </dl>
         <dl class="row">
             <dt class="col-sm-2">Статус</dt>
@@ -49,7 +49,7 @@
 </div>
 
 @code {
-    private Reservation? reservation;
+    private ReservationDto? reservation;
 
     [SupplyParameterFromQuery]
     private int BookingId { get; set; }
@@ -57,7 +57,21 @@
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        reservation = await context.Reservations.FirstOrDefaultAsync(m => m.BookingId == BookingId);
+        reservation = await context.Reservations
+                    .Include(d => d.Guests) // Загружаем связанные данные
+            .Include(d => d.Rooms)
+            .Include(d => d.Services)
+            .Select(d => new ReservationDto
+                {
+                    BookingId = d.BookingId,
+                    GuestName = $"{d.Guests.Surname} {d.Guests.Name} {d.Guests.Middlename}",
+                    RommNumber = d.Rooms.RommNumber,
+                    Servicename = d.Services.Name,
+                    StartDate = d.StartDate,
+                    EndDate = d.EndDate,
+                    BookingStatus = d.BookingStatus
+                })
+    .FirstOrDefaultAsync(m => m.BookingId == BookingId);
 
         if (reservation is null)
         {
@@ -68,8 +82,25 @@
     private async Task DeleteReservation()
     {
         using var context = DbFactory.CreateDbContext();
-        context.Reservations.Remove(reservation!);
-        await context.SaveChangesAsync();
+
+        var reservationToDelete = await context.Reservations.FindAsync(reservation!.BookingId);
+        if (reservationToDelete != null)
+        {
+            context.Reservations.Remove(reservationToDelete);
+            await context.SaveChangesAsync();
+        }
         NavigationManager.NavigateTo("/reservations");
+    }
+
+    public class ReservationDto
+    {
+        public int BookingId { get; set; }
+        public string? GuestName { get; set; }
+        public int RommNumber { get; set; }
+        public string? Servicename { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string? BookingStatus { get; set; }
+
     }
 }

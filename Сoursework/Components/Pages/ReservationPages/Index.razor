@@ -1,10 +1,12 @@
 ﻿@page "/reservations"
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
+@using System.Web
 @using Сoursework.Models
 @using Сoursework.Data
 @implements IAsyncDisposable
 @inject IDbContextFactory<Сoursework.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
 
 <PageTitle>Index Reservations</PageTitle>
 
@@ -14,15 +16,16 @@
     <a href="reservations/create">Добавить новое бронирование</a>
 </p>
 
-<QuickGrid Class="table" Items="context.Reservations">
-    <PropertyColumn Title="Гость" Property="reservation => reservation.GuestId" />
-    <PropertyColumn Title="Номер" Property="reservation => reservation.RoomId" />
-    <PropertyColumn Title="Услуга" Property="reservation => reservation.ServiceId" />
-    <PropertyColumn Title="Дата заезда" Property="reservation => reservation.StartDate" />
-    <PropertyColumn Title="Дата выезда" Property="reservation => reservation.EndDate" />
+<QuickGrid Class="table" Items="Reservations">
+    <PropertyColumn Title="Гость" Property="reservation => reservation.GuestName" />
+    <PropertyColumn Title="Номер" Property="reservation => reservation.RommNumber" />
+    <PropertyColumn Title="Услуга" Property="reservation => reservation.Servicename" />
+    <PropertyColumn Title="Дата заезда" Property="reservation => reservation.StartDate" Format="dd-MM-yyyy" />
+    <PropertyColumn Title="Дата выезда" Property="reservation => reservation.EndDate" Format="dd-MM-yyyy" />
     <PropertyColumn Title="Статус" Property="reservation => reservation.BookingStatus" />
 
     <TemplateColumn Context="reservation">
+        <a href="@($"payments?bookingid={reservation.BookingId}")">Оплаты</a> |
         <a href="@($"reservations/edit?bookingid={reservation.BookingId}")">Редактировать</a> |
         <a href="@($"reservations/details?bookingid={reservation.BookingId}")">Подробнее</a> |
         <a href="@($"reservations/delete?bookingid={reservation.BookingId}")">Удалить</a>
@@ -30,12 +33,57 @@
 </QuickGrid>
 
 @code {
+    [Parameter]
+    public int? GuestId { get; set; }
+    public int? RoomId { get; set; }
+    public int? ServiceId { get; set; }
     private ApplicationDbContext context = default!;
+    private IQueryable<ReservationDto> Reservations;
 
     protected override void OnInitialized()
     {
         context = DbFactory.CreateDbContext();
+        Reservations = GetReservations();
+        var uri = new Uri(NavigationManager.Uri);
+        var query = HttpUtility.ParseQueryString(uri.Query);
+
+        if (int.TryParse(query["guestId"], out int guestId))
+        {
+            GuestId = guestId;
+        }
     }
 
+    private IQueryable<ReservationDto> GetReservations() =>
+        context.Reservations
+        .Where(c => GuestId == null || c.GuestId == GuestId) // фильтрация по GuestId
+        .Where(c => RoomId == null || c.RoomId == RoomId) // фильтрация по RoomId
+        .Where(c => ServiceId == null || c.ServiceId == ServiceId) // фильтрация по ServiceId
+            .Include(d => d.Guests) // Загружаем связанные данные
+            .Include(d => d.Rooms)
+            .Include(d => d.Services)
+            .Select(d => new ReservationDto
+                {
+                    BookingId = d.BookingId,
+                    GuestName = $"{d.Guests.Surname} {d.Guests.Name} {d.Guests.Middlename}",
+                    RommNumber = d.Rooms.RommNumber,
+                    Servicename = d.Services.Name,
+                    StartDate = d.StartDate,
+                    EndDate = d.EndDate,
+                    BookingStatus = d.BookingStatus
+                });
+
     public async ValueTask DisposeAsync() => await context.DisposeAsync();
+
+
+    public class ReservationDto
+    {
+        public int BookingId { get; set; }
+        public string? GuestName { get; set; }
+        public int RommNumber { get; set; }
+        public string? Servicename { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string? BookingStatus { get; set; }
+
+    }
 }

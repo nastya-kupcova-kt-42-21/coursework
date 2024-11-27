@@ -28,7 +28,7 @@
             <dt class="col-sm-2">Телефон</dt>
             <dd class="col-sm-10">@guest.Phone</dd>
             <dt class="col-sm-2">Дата рождения</dt>
-            <dd class="col-sm-10">@guest.DateofBirth</dd>
+            <dd class="col-sm-10">@guest.DateofBirth.ToString("dd-MM-yyyy")</dd>
         </dl>
         <div>
             <a href="@($"/guests/edit?guestid={guest.GuestId}")">Редактировать</a> |
