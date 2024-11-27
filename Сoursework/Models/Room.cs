@@ -14,7 +14,7 @@ namespace Сoursework.Models
         [StringLength(100)]
         public string? RoomType { get; set; } //тип номера
 
-        public int MaxGuests { get; set; }
+        public int MaxGuests { get; set; } //макс кол-ство гостей
 
         [Column(TypeName = "decimal(18, 2)")]
         public decimal PriceForNight { get; set; } //цена за ночь

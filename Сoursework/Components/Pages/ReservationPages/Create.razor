@@ -57,7 +57,10 @@
             </div>        
             <div class="mb-3">
                 <label for="bookingstatus" class="form-label">Статус:</label>
-                <InputText id="bookingstatus" @bind-Value="Reservation.BookingStatus" class="form-control" aria-required="true"/> 
+                <InputSelect id="bookingstatus" @bind-Value="Reservation.BookingStatus" class="form-control" aria-required="true">
+                    <option value="Подтвержден">Подтвержден</option>
+                    <option value="Отменен">Отменен</option>
+                </InputSelect>
                 <ValidationMessage For="() => Reservation.BookingStatus" class="text-danger" /> 
             </div>        
             <button type="submit" class="btn btn-primary">Добавить</button>

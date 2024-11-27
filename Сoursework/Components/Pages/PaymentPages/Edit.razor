@@ -27,14 +27,21 @@ else
                     <InputNumber id="bookingid" @bind-Value="Payment.BookingId" class="form-control" />
                     <ValidationMessage For="() => Payment.BookingId" class="text-danger" />
                 </div>
-                <div class="mb-3">
+@*                 <div class="mb-3">
                     <label for="amount" class="form-label">Сумма:</label>
                     <InputNumber id="amount" @bind-Value="Payment.Amount" class="form-control" />
                     <ValidationMessage For="() => Payment.Amount" class="text-danger" />
+                </div> *@
+                <div class="mb-3">
+                    <label class="form-label">Сумма:</label>
+                    <p>@Payment.Amount.ToString("C")</p> <!-- Показываем сумму, а не редактируем -->
                 </div>
                 <div class="mb-3">
                     <label for="paymentmethod" class="form-label">Способ оплаты:</label>
-                    <InputText id="paymentmethod" @bind-Value="Payment.PaymentMethod" class="form-control" aria-required="true"/>
+                    <InputSelect id="paymentmethod" @bind-Value="Payment.PaymentMethod" class="form-control" aria-required="true">
+                        <option value="Наличными">Наличными</option>
+                        <option value="Онлайн">Онлайн</option>
+                    </InputSelect>
                     <ValidationMessage For="() => Payment.PaymentMethod" class="text-danger" />
                 </div>
                 <div class="mb-3">

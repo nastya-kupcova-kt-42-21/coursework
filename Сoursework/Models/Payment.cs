@@ -10,8 +10,8 @@ namespace Сoursework.Models
 
         public int BookingId { get; set; } //код бронирования
 
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal Amount { get; set; } //сумма
+        [NotMapped] // Указываем, что это свойство не должно сохраняться в базе данных
+        public decimal Amount => CalculateAmount(); // Вычисляемая сумма
 
         [Required]
         [StringLength(100)]
@@ -22,5 +22,15 @@ namespace Сoursework.Models
 
         [ForeignKey("BookingId")]
         public Reservation Reservations { get; set; } // связь с бронированием
+
+        //[NotMapped] // Указываем, что это свойство не должно сохраняться в базе данных
+        //public decimal Amount => CalculateAmount(); // Вычисляемая сумма
+
+        private decimal CalculateAmount()
+        {
+            decimal roomPrice = Reservations?.Rooms?.PriceForNight ?? 0; // Получаем цену за ночь
+            decimal servicesTotal = Reservations?.Services?.Price ?? 0; // Сумма всех цен на услуги
+            return roomPrice + servicesTotal; // Общая сумма
+        }
     }
 }

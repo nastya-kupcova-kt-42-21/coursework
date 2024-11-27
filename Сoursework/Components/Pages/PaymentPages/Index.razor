@@ -47,7 +47,13 @@
     }
 
     private IQueryable<Payment> Payments => context.Payments
-        .Where(c => !BookingId.HasValue || c.BookingId == BookingId); // Теперь фильтр работает корректно
+        .Include(p => p.Reservations)
+            .ThenInclude(r => r.Rooms)
+        .Include(p => p.Reservations)
+            .ThenInclude(r => r.Services)
+        .Where(c => !BookingId.HasValue || c.BookingId == BookingId);
 
     public async ValueTask DisposeAsync() => await context.DisposeAsync();
+
 }
+

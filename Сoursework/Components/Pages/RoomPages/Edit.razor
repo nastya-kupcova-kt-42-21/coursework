@@ -29,7 +29,14 @@ else
                 </div>
                 <div class="mb-3">
                     <label for="roomtype" class="form-label">Тип:</label>
-                    <InputText id="roomtype" @bind-Value="Room.RoomType" class="form-control" aria-required="true"/>
+                    <InputSelect id="roomtype" @bind-Value="Room.RoomType" class="form-control" aria-required="true" >
+                        <option value="Однокомнатная стандарт">Однокомнатная стандарт</option>
+                        <option value="Двухкомнатная стандарт">Двухкомнатная стандарт</option>
+                        <option value="Однокомнатная комфорт">Однокомнатная комфорт</option>
+                        <option value="Двухкомнатная комфорт">Двухкомнатная комфорт</option>
+                        <option value="Двухкомнатный люкс">Двухкомнатный люкс</option>
+                        <option value="Трехкомнатный люкс">Двухкомнатный люкс</option>
+                    </InputSelect>
                     <ValidationMessage For="() => Room.RoomType" class="text-danger" />
                 </div>
                 <div class="mb-3">
@@ -44,7 +51,10 @@ else
                 </div>
                 <div class="mb-3">
                     <label for="availability" class="form-label">Доступность:</label>
-                    <InputText id="availability" @bind-Value="Room.Availability" class="form-control" aria-required="true"/>
+                    <InputSelect id="availability" @bind-Value="Room.Availability" class="form-control" aria-required="true">
+                        <option value="Занят">Занят</option>
+                        <option value="Свободен">Свободен</option>
+                    </InputSelect>
                     <ValidationMessage For="() => Room.Availability" class="text-danger" />
                 </div>
                 <button type="submit" class="btn btn-primary">Сохранить</button>
